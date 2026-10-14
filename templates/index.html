@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Достопримечательности Таганрога{% endblock %}
+
+{% block content %}
+<section class="intro">
+  <div class="intro__content">
+    <blockquote class="blockquote">
+      <p>Всю жизнь свою провёл в дороге, простыл и умер в Таганроге</p>
+      <cite>Пушкин А.С.</cite>
+    </blockquote>
+  </div>
+</section>
+
+<section class="gallery" aria-label="Исторические личности">
+  {% for person in persons %}
+    <a class="card card--{{ person.slug }}" href="{{ url_for('page', slug=person.slug) }}">
+      <h2 class="card__title">{{ person.name }}</h2>
+    </a>
+  {% endfor %}
+</section>
+
+<a class="banner" href="{{ url_for('page', slug='other') }}">
+  <h2 class="banner__title">Другие достопримечательности</h2>
+</a>
+
+<section class="landmarks" aria-label="Достопримечательности">
+  {% for item in landmarks %}
+    <a class="landmark" href="{{ url_for('page', slug=item.slug) }}">
+      <h3 class="landmark__title">{{ item.title }}</h3>
+      <img class="landmark__image"
+           src="{{ url_for('static', filename='img/' ~ item.image) }}"
+           alt="{{ item.title|capitalize }}" loading="lazy">
+      {% if item.text %}
+        <p class="landmark__text">{{ item.text }}</p>
+      {% endif %}
+    </a>
+  {% endfor %}
+</section>
+{% endblock %}
