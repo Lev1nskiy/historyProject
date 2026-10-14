@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<article class="article">
+  <h1 class="article__title">{{ heading }}</h1>
+  {% if image %}
+    <img class="article__image"
+         src="{{ url_for('static', filename='img/' ~ image) }}"
+         alt="{{ image_alt }}">
+  {% endif %}
+  {% block article %}{% endblock %}
+</article>
+{% endblock %}

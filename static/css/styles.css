@@ -1,42 +1,397 @@
+/* Таганрог — исторические места города.
+   Оформление: тёмная галерея на главной и светлые текстовые страницы-статьи. */
+
+:root {
+  --accent: #52bad5;
+  --accent-dark: #2c9ab7;
+  --dark: #2d2d2d;
+  --darker: #1e1e1e;
+  --muted: #717070;
+  --text: #333333;
+  --background: #f2f2f2;
+  --white: #ffffff;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-heading: "Arial Narrow", "Franklin Gothic Medium", Arial, sans-serif;
+  --radius: 6px;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #d0d0d0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background-color: var(--background);
+  line-height: 1.55;
 }
 
-header {
-  background-color: #333;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-header a {
-  color: #fff;
-  text-decoration: none;
+/* ------------------------------------------------------------ шапка/подвал */
+.site-header {
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+  background-color: var(--accent);
+  border-bottom: 1px solid var(--accent-dark);
+}
+
+.site-header__link {
+  padding: 6px 14px;
+  color: var(--white);
   font-weight: bold;
-  padding: 5px 10px;
-  border: 1px solid #fff;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  text-decoration: none;
+  border: 1px solid var(--white);
+  border-radius: var(--radius);
+  transition: background-color 0.3s ease;
 }
 
-header a:hover {
-  background-color: #555;
+.site-header__link:hover,
+.site-header__link:focus-visible {
+  background-color: var(--accent-dark);
 }
 
-main {
+.site-footer {
+  padding: 24px 16px;
   text-align: center;
-  padding: 50px;
+  color: var(--white);
+  background-color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 13px;
 }
 
-footer {
-  background-color: #333;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-  position: fixed;
-  bottom: 0;
+.site-footer p {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------- главная: интро */
+.intro {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px 16px;
+  background: url("../img/cover.png") center / cover no-repeat;
+}
+
+.intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.intro__content {
+  position: relative;
+  z-index: 1;
   width: 100%;
+  max-width: 900px;
+}
+
+.blockquote {
+  margin: 0;
+  padding: 24px;
+  color: var(--white);
+  text-align: center;
+  border-top: 2px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.blockquote p {
+  margin: 0 0 12px;
+  font-family: var(--font-heading);
+  font-size: clamp(20px, 3.2vw, 34px);
+  letter-spacing: 1px;
+}
+
+.blockquote cite {
+  color: #d3d3d3;
+  font-size: 15px;
+  font-style: normal;
+}
+
+/* --------------------------------------------------- главная: галерея карт */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background-color: var(--dark);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  background-position: center;
+  background-size: cover;
+  transition: background-image 0.4s ease, transform 0.3s ease;
+}
+
+.card__title {
+  margin: 0;
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: 26px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.card--petr {
+  background-image: url("../img/petr-i.png");
+}
+
+.card--petr:hover,
+.card--petr:focus-visible {
+  background-image: url("../img/petr-i-hover.jpg");
+}
+
+.card--alex {
+  background-image: url("../img/alexander-i.png");
+}
+
+.card--alex:hover,
+.card--alex:focus-visible {
+  background-image: url("../img/alexander-i-hover.png");
+}
+
+.card--chehov {
+  background-image: url("../img/chekhov.png");
+}
+
+.card--chehov:hover,
+.card--chehov:focus-visible {
+  background-image: url("../img/chekhov-hover.png");
+}
+
+.card--ranevskaya {
+  background-image: url("../img/ranevskaya.png");
+}
+
+.card--ranevskaya:hover,
+.card--ranevskaya:focus-visible {
+  background-image: url("../img/ranevskaya-hover.png");
+}
+
+/* --------------------------------------------------- главная: баннер, плитки */
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-decoration: none;
+  background-image: url("../img/taganrog-night.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: background-image 0.4s ease;
+}
+
+.banner:hover,
+.banner:focus-visible {
+  background-image: url("../img/taganrog-night-hover.jpg");
+}
+
+.banner__title {
+  margin: 0;
+  padding: 0 16px;
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: clamp(20px, 2.6vw, 30px);
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.landmarks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 32px 16px;
+  background-color: var(--darker);
+}
+
+.landmark {
+  display: block;
+  padding: 16px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background-color 0.3s ease;
+}
+
+.landmark:hover,
+.landmark:focus-visible {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.landmark__title {
+  margin: 0 0 12px;
+  color: var(--white);
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+}
+
+.landmark__image {
+  width: 100%;
+  max-width: 400px;
+  max-height: 260px;
+  margin: 0 auto 12px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.landmark__text {
+  margin: 0;
+  color: #dcdcdc;
+  font-size: 15px;
+}
+
+/* ------------------------------------------------------------- страницы-статьи */
+.article {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.article__title {
+  margin: 0 0 24px;
+  font-family: var(--font-heading);
+  font-size: clamp(26px, 3.4vw, 38px);
+  text-align: center;
+}
+
+.article__image {
+  width: 100%;
+  margin: 0 auto 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.article h2 {
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  color: var(--dark);
+  border-bottom: 2px solid var(--accent);
+}
+
+.article p {
+  margin: 0 0 16px;
+  text-align: justify;
+}
+
+.article blockquote {
+  margin: 24px 0;
+  padding: 16px 24px;
+  background-color: #ffffff;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  font-style: italic;
+}
+
+.article blockquote p {
+  margin: 0;
+  text-align: left;
+}
+
+.quote-source {
+  color: var(--muted);
+  font-style: italic;
+  text-align: right;
+}
+
+.timeline {
+  margin: 0 0 24px;
+  padding: 0 0 0 8px;
+  list-style: none;
+}
+
+.timeline li {
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 24px;
+  color: var(--dark);
+}
+
+.timeline li::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent);
+  border-radius: 50%;
+}
+
+.inscription {
+  margin: 24px auto;
+  padding: 20px;
+  max-width: 420px;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #d5d5d5;
+  border-radius: var(--radius);
+}
+
+.inscription p {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+}
+
+.article--stub {
+  text-align: center;
+}
+
+.article__stub-text {
+  font-size: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.article a {
+  color: var(--accent-dark);
+}
+
+/* ------------------------------------------------------------- адаптивность */
+@media (max-width: 900px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gallery,
+  .landmarks {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: 200px;
+  }
+
+  .article p {
+    text-align: left;
+  }
 }

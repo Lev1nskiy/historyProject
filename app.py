@@ -1,45 +1,219 @@
-from flask import Flask, render_template, url_for
+"""Flask-приложение: достопримечательности и история Таганрога.
+
+Маршруты:
+    /               — главная страница (галерея разделов)
+    /main           — то же, что /
+    /main/<slug>    — статья о достопримечательности
+
+Страницы описаны декларативно в словарях PAGES/LANDING_*, шаблоны лежат
+в templates/, а разметка наследуется от base.html -> article.html.
+"""
+import os
+
+from flask import Flask, abort, render_template
 
 app = Flask(__name__)
-app.secret_key = 'bara bara bara bere bere bere'
+
+# --------------------------------------------------------------- статьи
+# slug -> параметры для templates/article.html (шаблон — templates/pages/<slug>.html)
+PAGES = {
+    'petr': {
+        'template': 'petr.html',
+        'title': 'Пётр I',
+        'heading': 'Пётр I',
+        'image': 'petr-i-hover.jpg',
+        'image_alt': 'Памятник Петру I в Таганроге',
+    },
+    'alex': {
+        'template': 'alexander-i.html',
+        'title': 'Александр I',
+        'heading': 'Александр I',
+        'image': 'alexander-i-hover.png',
+        'image_alt': 'Памятник Александру I в Таганроге',
+    },
+    'chehov': {
+        'template': 'chekhov.html',
+        'title': 'Чехов А.П.',
+        'heading': 'А. П. Чехов',
+        'image': 'chekhov-hover.png',
+        'image_alt': 'Памятник А. П. Чехову в Таганроге',
+    },
+    'bogudonia': {
+        'template': 'bogudonia.html',
+        'title': 'Богудония',
+        'heading': 'Богудония',
+        'image': 'bogudonia.jpg',
+        'image_alt': 'Район Богудония в Таганроге',
+    },
+    'kdom': {
+        'template': 'round-house.html',
+        'title': 'Круглый дом',
+        'heading': 'Круглый дом',
+        'image': 'kruglyy-dom.jpg',
+        'image_alt': 'Круглый дом в Таганроге',
+    },
+    'Kukolnik': {
+        'template': 'kukolnik-house.html',
+        'title': 'Дом Кукольника',
+        'heading': 'Дом Кукольника',
+        'image': 'kukolnik.jpg',
+        'image_alt': 'Дом Кукольника на улице Петровской',
+    },
+    'kvartal': {
+        'template': 'petrovsky-quarter.html',
+        'title': 'Петровский квартал',
+        'heading': 'Петровский (европейский) квартал',
+        'image': 'evropeyskiy-kvartal.jpg',
+        'image_alt': 'Петровский квартал в Таганроге',
+    },
+    'muzey': {
+        'template': 'museum.html',
+        'title': 'Музей градостроительства',
+        'heading': 'Музей градостроительства и быта',
+        'image': 'muzey.jpg',
+        'image_alt': 'Музей градостроительства и быта в Таганроге',
+    },
+    'parovoz': {
+        'template': 'steam-locomotive.html',
+        'title': 'Паровоз',
+        'heading': 'Паровоз',
+        'image': 'parovoz.jpg',
+        'image_alt': 'Памятник паровозу на площади Восстания',
+    },
+}
+
+# -------------------------------------------------- страницы-заглушки
+STUBS = {
+    'other': {
+        'title': 'Другие достопримечательности',
+        'heading': 'Другие достопримечательности',
+        'text': 'В разработке...',
+    },
+    'ranevskaya': {
+        'title': 'Раневская Ф.Г.',
+        'heading': 'Раневская Ф.Г.',
+        'text': 'В разработке...',
+    },
+    'Firt_BFG': {
+        'title': 'Firt_BFG',
+        'heading': 'Firt_BFG',
+        'text': 'Oh, it`s me. But you mast not be here! Get out!',
+    },
+}
+
+# ----------------------------------------------------- данные главной
+LANDING_PERSONS = [
+    {'slug': 'petr', 'name': 'Пётр I'},
+    {'slug': 'alex', 'name': 'Александр I'},
+    {'slug': 'chehov', 'name': 'Чехов А.П.'},
+    {'slug': 'ranevskaya', 'name': 'Раневская Ф.Г.'},
+]
+
+LANDING_LANDMARKS = [
+    {
+        'slug': 'bogudonia',
+        'title': 'Богудония',
+        'image': 'bogudonia.jpg',
+        'text': 'В Богудонии (или в том месте, где сейчас находится этот район) издавна '
+                'проживали рыбаки. Храбрые «морские волки» строили дома как и где придется, '
+                'поэтому сегодня район представляет из себя переплетение узких улочек со '
+                'стоящими на них небольшими и жмущимися друг к другу домиками.',
+    },
+    {
+        'slug': 'parovoz',
+        'title': 'Паровоз',
+        'image': 'parovoz.jpg',
+        'text': 'Неподалеку от железнодорожного вокзала Таганрога, на площади Восстания, '
+                'расположен памятник в честь железнодорожников, во время гражданской войны '
+                'принимавших участие в разгроме белогвардейцев.',
+    },
+    {
+        'slug': 'muzey',
+        'title': 'Музей',
+        'image': 'muzey.jpg',
+        'text': 'Дом, построенный в 1912 году в романтическом стиле модерн, согласно легенде '
+                'предназначался в качестве приданого 16-летней дочери хозяина Марусе Шароновой. '
+                'Однако надежды на будущую счастливую жизнь в особняке-тереме, украшенном '
+                'знаменитой на всю Россию абрамцевской майоликой, не осуществились: '
+                'в 1923 году домовладение было национализировано.',
+    },
+    {
+        'slug': 'kdom',
+        'title': 'Круглый дом',
+        'image': 'kruglyy-dom.jpg',
+        'text': 'Круглый дом был построен в Таганроге в 1929 году. Этот жилой трёхэтажный '
+                '36-квартирный дом завода «Красный Котельщик» — первый построенный в СССР дом '
+                'такого типа. Дом экспериментальный, задуман как символ советской архитектуры: '
+                'минимум строительных материалов, максимум прочности.',
+    },
+    {
+        'slug': 'kvartal',
+        'title': 'Петровский квартал',
+        'image': 'evropeyskiy-kvartal.jpg',
+        'text': 'Раньше в этом месте стояла первая в Таганроге кондитерская фабрика, с годами '
+                'она пришла в запустение. Ее старые фасады, как и стены стоявших рядом зданий, '
+                'давно обветшали и требовали хозяйской руки. Ею стала рука отца сегодняшней '
+                'хозяйки кафе «Мадам Ку-Ку», в прошлом капитана дальнего плавания.',
+    },
+    {
+        'slug': 'alex',
+        'title': 'Дворец Александра I',
+        'image': 'alexander-palace.jpg',
+        'text': 'Особняк был построен в 1806 году чиновницей Сивере. В 1816 году здание было '
+                'перестроено по проекту архитектора Ф. Молла и продано городу под квартиру '
+                'градоначальника. Наиболее значительным из владельцев был градоначальник '
+                'Таганрога Пётр Папков, который купил его спустя четыре года после постройки.',
+    },
+    {
+        'slug': 'Kukolnik',
+        'title': 'Дом Кукольника',
+        'image': 'kukolnik.jpg',
+        'text': 'В 1857 году в Таганроге, в деревянном здании, которое было построено на каменном '
+                'фундаменте, поселилась семья: Нестор Васильевич Кукольник и его жена Амалия '
+                'Ивановна. В 1861 году Амалия Кукольник подала прошение в строительный комитет '
+                'с целью составления проекта двухэтажного кирпичного дома, который в итоге был '
+                'построен и сохранился до наших времен по адресу улица Петровская, 74.',
+    },
+    {
+        'slug': 'other',
+        'title': 'Далее...',
+        'image': 'other.jpg',
+        'text': '',
+    },
+]
 
 
 @app.route('/')
 @app.route('/main')
 def main_page():
-    return render_template('main.html')
+    """Главная страница с галереей разделов."""
+    return render_template(
+        'index.html',
+        persons=LANDING_PERSONS,
+        landmarks=LANDING_LANDMARKS,
+    )
 
 
-@app.route('/main/<string:name>')
-def petr(name):
-    if name == 'petr':
-        return render_template("petr.html")
-    elif name == 'alex':
-        return render_template("alex.html")
-    elif name == 'chehov':
-        return render_template("4eh.html")
-    elif name == 'bogudonia':
-        return render_template("bogudonia.html")
-    elif name == 'kdom':
-        return render_template("kdom.html")
-    elif name == 'Kukolnik':
-        return render_template("Kukolnik.html")
-    elif name == 'kvartal':
-        return render_template("kvartal.html")
-    elif name == 'muzey':
-        return render_template("muzey.html")
-    elif name == 'parovoz':
-        return render_template("parovoz.html")
-    elif name == 'main':
-        return render_template("main.html")
+@app.route('/main/<string:slug>')
+def page(slug):
+    """Статья о достопримечательности или страница-заглушка."""
+    if slug == 'main':
+        return main_page()
+    if slug in PAGES:
+        return render_template(f"pages/{PAGES[slug]['template']}", **PAGES[slug])
+    if slug in STUBS:
+        return render_template('stub.html', **STUBS[slug])
+    abort(404)
 
-    elif name == 'Firt_BFG':
-        return 'Oh, it`s me. But you mast not be here! Get out!'
-    elif name == 'other':
-        return 'В разработке...'
-    else:
-        return 'page is not exist. Maybe it will be added tater. Your Firt_BFG, love you'
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(
+        host=os.environ.get('HOST', '0.0.0.0'),
+        port=int(os.environ.get('PORT', 5000)),
+        debug=os.environ.get('FLASK_DEBUG', '1') == '1',
+    )
